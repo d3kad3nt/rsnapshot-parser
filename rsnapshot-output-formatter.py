@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from datetime import datetime
 
 UTF_8 = "UTF-8"
 
@@ -118,6 +119,27 @@ class LogOutput:
                 reallines.append(line)
         return reallines
 
+    def executedBackupCommands(self):
+        executedCommands = 0
+        for backupPoint in self.backupPoints:
+            if hasattr(backupPoint, "log") and len(backupPoint.log) > 0:
+                executedCommands += 1
+        return executedCommands
+
+    def notExecutedBackupCommands(self):
+        notExecutedCommands = 0
+        for backupPoint in self.backupPoints:
+            if hasattr(backupPoint, "log") and len(backupPoint.log) == 0:
+                notExecutedCommands += 1
+        return notExecutedCommands
+
+    def failedBackupCommands(self):
+        failedCommands = 0
+        for backupPoint in self.backupPoints:
+            if hasattr(backupPoint, "failed") and backupPoint.failed:
+                failedCommands += 1
+        return failedCommands
+
 
 class RsnapshotConfig:
     def __init__(self, argparse):
@@ -153,7 +175,7 @@ class RsnapshotConfig:
         if args.configfile:
             configfile = args.configfile
             if not os.path.isfile(configfile):
-                Exception("The configfile {} doesn't exist.".format(configfile))
+                raise Exception("The configfile {} doesn't exist.".format(configfile))
         else:
             configfile = "/etc/rsnapshot.conf"
         with open(configfile, "r", encoding=UTF_8) as config:
@@ -178,12 +200,47 @@ class RsnapshotConfig:
         return result
 
 
+class OutputModule:
+    def output(self, logOutput):
+        raise Exception("Not implemented in specific Module")
+
+
+class TextModule(OutputModule):
+    def output(self, logOutput):
+        print("Backup at {}".format(datetime.now()))
+        print("{} Backup Commands executed".format(logOutput.executedBackupCommands()))
+        print("{} Backup Commands failed".format(logOutput.failedBackupCommands()))
+        print(
+            "{} Backup Commands not executed".format(
+                logOutput.notExecutedBackupCommands()
+            )
+        )
+
+
+def moduleExits(moduleName):
+    # TODO add read modules
+    if moduleName == "text":
+        return True
+    else:
+        return False
+
+
+def getModule(moduleName):
+    return TextModule()
+
+
+def outputLog(outputModuleNames, logOutput: LogOutput):
+    for moduleName in outputModuleNames:
+        if moduleExits(moduleName):
+            getModule(moduleName).output(logOutput)
+
+
 def main():
     argparser = getArgparser()
     args = argparser.parse_args()
     config = RsnapshotConfig(args)
     parsedLog = LogOutput(config, args.input)
-    printList(parsedLog.backupPoints[0].log, end="")
+    outputLog(args.output, parsedLog)
 
 
 if __name__ == "__main__":
