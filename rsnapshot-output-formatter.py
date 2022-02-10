@@ -8,11 +8,13 @@ UTF_8 = "UTF-8"
 
 def getArgparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description='This program is used to format the output of rsnapshot and output it to different backends')
-    parser.add_argument('-o', '--output', nargs='+', required=True)
-    parser.add_argument('-i', '--input', required=True)
-    parser.add_argument('-c', '--configfile', required=False,
-                        help="The used Rsnapshot configfile")
+        description="This program is used to format the output of rsnapshot and output it to different backends"
+    )
+    parser.add_argument("-o", "--output", nargs="+", required=True)
+    parser.add_argument("-i", "--input", required=True)
+    parser.add_argument(
+        "-c", "--configfile", required=False, help="The used Rsnapshot configfile"
+    )
     return parser
 
 
@@ -26,7 +28,6 @@ def printList(list, end="\n"):
 
 
 class RsnapshotCommand:
-
     def addLog(self, log):
         self.log = log
 
@@ -38,7 +39,6 @@ class RsnapshotCommand:
 
 
 class BackupExecCommand(RsnapshotCommand):
-
     def __init__(self, command):
         self.command = command
 
@@ -47,7 +47,6 @@ class BackupExecCommand(RsnapshotCommand):
 
 
 class BackupScriptCommand(RsnapshotCommand):
-
     def __init__(self, source, destination):
         self.source = source
         self.destination = destination
@@ -57,7 +56,6 @@ class BackupScriptCommand(RsnapshotCommand):
 
 
 class BackupCommand(RsnapshotCommand):
-
     def __init__(self, source, destination):
         self.source = source
         self.destination = destination
@@ -71,8 +69,11 @@ class BackupCommand(RsnapshotCommand):
         print(self.type)
         print(self.command)
         printList(self.log)
-        changedStr = findLinesStartingWith(self.log, "Total bytes received")[
-            0].split(":")[1].strip()
+        changedStr = (
+            findLinesStartingWith(self.log, "Total bytes received")[0]
+            .split(":")[1]
+            .strip()
+        )
         changed = Int(changedStr)
         print(changedStr)
         print(changed)
@@ -92,8 +93,7 @@ class LogOutput:
         for line in self.log:
             if backupPoints[currentBackupPoint].backupStartLine() in line:
                 if currentBackupPoint > 0:
-                    backupPoints[currentBackupPoint -
-                                 1].addLog(currentBackupPointLog)
+                    backupPoints[currentBackupPoint - 1].addLog(currentBackupPointLog)
                 currentBackupPoint += 1
                 currentBackupPointLog = []
             currentBackupPointLog.append(line)
@@ -101,7 +101,7 @@ class LogOutput:
         return backupPoints
 
     def readInput(self, filename: str):
-        with open(filename, 'r', encoding='utf8') as logfile:
+        with open(filename, "r", encoding="utf8") as logfile:
             lines = logfile.readlines()
         linestart = ""
         reallines = []
@@ -109,23 +109,27 @@ class LogOutput:
             # Rsnapshot cuts long lines into multiple lines seperated by "\"
             if linestart:
                 line = linestart + line[4:]
-                #print("combined line: {}".format(line))
+                # print("combined line: {}".format(line))
             if line.endswith("\\\n"):
                 linestart = line.strip()[:-1]
-                #print("half-line: {}".format(linestart))
+                # print("half-line: {}".format(linestart))
             else:
                 linestart = ""
                 reallines.append(line)
         return reallines
 
 
-class RsnapshotConfig():
-
+class RsnapshotConfig:
     def __init__(self, argparse):
         self.parseConfig(argparse)
 
     def getValuesInConfig(self, key):
-        return list(map(lambda line: line.strip().split("\t")[1], findLinesStartingWith(self.lines, key)))
+        return list(
+            map(
+                lambda line: line.strip().split("\t")[1],
+                findLinesStartingWith(self.lines, key),
+            )
+        )
 
     def getSnapshotRoot(self):
         return self.getValuesInConfig("snapshot_root")[0]
@@ -138,8 +142,7 @@ class RsnapshotConfig():
                 backupPoints.append(BackupCommand(command[1], command[2]))
             elif line.startswith("backup_script"):
                 command = line.strip().split("\t")
-                backupPoints.append(
-                    BackupScriptCommand(command[1], command[2]))
+                backupPoints.append(BackupScriptCommand(command[1], command[2]))
             elif line.startswith("backup_exec"):
                 command = line.strip().split("\t")
                 backupPoints.append(BackupExecCommand(command[1]))
@@ -153,7 +156,7 @@ class RsnapshotConfig():
                 Exception("The configfile {} doesn't exist.".format(configfile))
         else:
             configfile = "/etc/rsnapshot.conf"
-        with open(configfile, 'r', encoding=UTF_8) as config:
+        with open(configfile, "r", encoding=UTF_8) as config:
             configLines = self.loadConfig(config)
             self.lines = configLines
 
@@ -165,8 +168,9 @@ class RsnapshotConfig():
             elif "include_conf" in line:
                 command = line.split("\t")[1].replace("`", "")
                 out = subprocess.check_output(
-                    command.split(), shell=True, encoding=encoding)
-                result += (self.loadConfig(out.split("\n")))
+                    command.split(), shell=True, encoding=encoding
+                )
+                result += self.loadConfig(out.split("\n"))
             else:
                 strippedLine = line.strip()
                 if strippedLine:
@@ -182,5 +186,5 @@ def main():
     printList(parsedLog.backupPoints[0].log, end="")
 
 
-if (__name__ == "__main__"):
+if __name__ == "__main__":
     main()
