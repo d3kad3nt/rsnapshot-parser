@@ -1,33 +1,25 @@
+from parser.ParsedOutput import ParsedOutput
 from parser.ResultStates import *
-from utils.utils import printList
 from . import outputModule
-from datetime import datetime
 
 
 class TextModule(outputModule.OutputModule):
-    def output(self, logOutput):
-        print("Backup at {}".format(datetime.now()))
+    def output(self, parsed_output: ParsedOutput):
+        print("Backup at {}".format(parsed_output.start_time))
         print(
             "{} Backup Commands executed".format(
-                logOutput.commandsNotWithStatusCount(NotExecutedState)
+                parsed_output.commands_not_with_status_count(NotExecutedState)
             )
         )
         print(
             "{} Backup Commands succeeded".format(
-                logOutput.commandsWithStatusCount(SuccessState)
+                parsed_output.commands_with_state_count(SuccessState)
             )
         )
         print(
             "{} Backup Commands failed".format(
-                logOutput.commandsWithStatusCount(FailedState)
+                parsed_output.commands_with_state_count(FailedState)
             )
         )
-        notExecuted = logOutput.commandsWithStatusCount(NotExecutedState)
-        print("{} Backup Commands not executed".format(notExecuted))
-        # if notExecuted > 0:
-        #     i = 52
-        #     print(logOutput.commandsNotWithStatus(NotExecutedState)[i])
-        #     print(logOutput.commandsNotWithStatus(NotExecutedState)[i + 1])
-        #     print()
-        #     printList(logOutput.commandsNotWithStatus(NotExecutedState)[i].log, end="")
-            # printList(logOutput.commandsWithStatus(NotExecutedState))
+        not_executed = parsed_output.commands_with_state_count(NotExecutedState)
+        print("{} Backup Commands not executed".format(not_executed))

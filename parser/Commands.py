@@ -1,3 +1,5 @@
+import datetime
+
 from parser.ResultStates import *
 from utils.utils import findLinesStartingWith, printList
 
@@ -5,15 +7,42 @@ from utils.utils import findLinesStartingWith, printList
 class RsnapshotCommand:
     def __init__(self):
         self.log = []
+        self._start_time: datetime.datetime = datetime.datetime.min
+        self._end_time: datetime.datetime = datetime.datetime.min
 
-    def addLog(self, log):
-        self.log = log
-        self.state = self.getState()
+    @property
+    def start_time(self) -> datetime.datetime:
+        return self._start_time
 
-    def backupStartLine(self):
+    @start_time.setter
+    def start_time(self, start_time: datetime.datetime):
+        self._start_time = start_time
+
+    @property
+    def end_time(self) -> datetime.datetime:
+        return self._start_time
+
+    @end_time.setter
+    def end_time(self, end_time: datetime.datetime):
+        self._end_time = end_time
+
+    @property
+    def duration(self):
+        return self.end_time - self.start_time
+
+    @property
+    def log(self):
+        return self._log
+
+    @log.setter
+    def log(self, log):
+        self._log = log
+
+    def backup_start_line(self):
         return ""
 
-    def getState(self):
+    @property
+    def state(self):
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
         return UnknownState("Not implemented")
@@ -21,10 +50,10 @@ class RsnapshotCommand:
 
 class BackupExecCommand(RsnapshotCommand):
     def __init__(self, command):
-        self.command = command
+        self.command: str = command
         super().__init__()
 
-    def backupStartLine(self):
+    def backup_start_line(self):
         return self.command
 
     def __str__(self):
@@ -37,10 +66,10 @@ class BackupScriptCommand(RsnapshotCommand):
         self.destination = destination
         super().__init__()
 
-    def backupStartLine(self):
+    def backup_start_line(self):
         return self.source
 
-    def getState(self):
+    def state(self):
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
         return UnknownState("No way found to check state")
@@ -57,27 +86,20 @@ class BackupCommand(RsnapshotCommand):
         self.destination = destination
         super().__init__()
 
-    def addLog(self, log):
-        self.log = log
-
-    def backupStartLine(self):
+    def backup_start_line(self):
         return "{} /mnt/Backup/daily.0/{}".format(self.source, self.destination)
 
-    def getChangedSize(self):
-        print(self.type)
-        print(self.command)
+    @property
+    def changed_size(self):
         printList(self.log)
-        changedStr = (
-            findLinesStartingWith(self.log, "Total bytes received")[0]
-            .split(":")[1]
-            .strip()
+        changed_str = (
+            findLinesStartingWith(self.log, "Total bytes received")[0].split(":")[1].strip()
         )
-        changed = int(changedStr)
-        print(changedStr)
-        print(changed)
+        changed = int(changed_str)
         return changed
 
-    def getState(self):
+    @property
+    def state(self):
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
         if findLinesStartingWith(self.log, "rsync succeeded"):

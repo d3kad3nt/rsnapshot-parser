@@ -6,7 +6,7 @@ import os
 
 import modules.modules
 from modules import *
-from parser.ParsedOutput import LogOutput
+from parser.ParsedOutput import ParsedOutput
 from parser.RsnapshotConfig import RsnapshotConfig
 
 UTF_8 = "UTF-8"
@@ -24,41 +24,27 @@ def getArgs():
     return parser.parse_args()
 
 
-class Mock:
-    pass
-
-
-def getArgsMock():
-    args = Mock()
-    args.output = ["text", "test"]
-    args.configfile = "rsnapshot.conf"
-    args.input = "rsnapshot.out"
-    return args
-
 def getModule(moduleName):
     return modules.all_modules[moduleName]
 
 
-def moduleExits(moduleName):
-    curr_path = os.path.join(os.path.dirname(__file__), "modules")
-    moduleFiles = []
-    for f in glob.glob("{}/*.py".format(curr_path)):
-        moduleFiles.append(os.path.basename(f).split(".")[0])
-    moduleFiles.remove("__init__")
-    return moduleName in moduleFiles
+def moduleExits(module_name: str):
+    return module_name.lower() in modules.all_modules
 
 
-def outputLog(outputModuleNames, logOutput: LogOutput):
+def outputLog(outputModuleNames, logOutput: ParsedOutput):
     for moduleName in outputModuleNames:
         if moduleExits(moduleName):
-            getModule(moduleName).output(logOutput)
+            getModule(moduleName.lower()).output(logOutput)
+        else:
+            print("Module {} not found".format(moduleName))
 
 
 def main():
-    args = getArgsMock()
+    args = getArgs()
     config = RsnapshotConfig(args.configfile)
-    parsedLog = LogOutput(config, args.input)
-    outputLog(args.output, parsedLog)
+    parsed_log = ParsedOutput(config, args.input)
+    outputLog(args.output, parsed_log)
 
 
 if __name__ == "__main__":
