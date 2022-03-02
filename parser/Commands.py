@@ -107,5 +107,19 @@ class BackupCommand(RsnapshotCommand):
 
         return UnknownState("Not implemented")
 
+    @property
+    def get_changed_files(self):
+        start_changed_files = "receiving incremental file list"
+        filelist = False
+        files = []
+        for line in self.log:
+            if start_changed_files in line:
+                filelist = True
+            elif line.strip().is_empty():
+                filelist = False
+            elif filelist:
+                files.append(line.strip())
+        return files
+
     def __str__(self):
         return "Backup: Source: {}, Dest: {}".format(self.source, self.destination)
