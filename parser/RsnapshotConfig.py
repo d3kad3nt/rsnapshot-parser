@@ -1,6 +1,8 @@
 import subprocess
 import os
-from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand
+from collections.abc import Iterable, Collection
+
+from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
 from utils.utils import findLinesStartingWith
 
 
@@ -17,10 +19,12 @@ class RsnapshotConfig:
             )
         )
 
-    def getSnapshotRoot(self):
+    @property
+    def snapshot_root(self):
         return self.getValuesInConfig("snapshot_root")[0]
 
-    def getBackupPoints(self):
+    @property
+    def backup_points(self) -> list[RsnapshotCommand]:
         backupPoints = []
         for line in self.lines:
             if line.startswith("backup\t"):
@@ -33,6 +37,14 @@ class RsnapshotConfig:
                 command = line.strip().split("\t")
                 backupPoints.append(BackupExecCommand(command[1]))
         return backupPoints
+
+    @property
+    def retain_types(self):
+        types = []
+        for line in self.lines:
+            if line.startswith("retain"):
+                types.append(line.strip().split("\t")[1])
+        return types
 
     def parseConfig(self, custom_configfile):
         configfile = ""
