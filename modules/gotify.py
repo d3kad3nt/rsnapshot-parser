@@ -15,7 +15,7 @@ class GotifyModule(OutputModule):
         self._api_token = self._config.get_value(key="api_token")
 
     def output(self, log_output: ParsedOutput):
-        if log_output.successful():
+        if log_output.successful:
             message = "Finished after {}".format(log_output.duration)
             self._send_message(title="Backup Successful", message=message, priority=3)
 

@@ -55,7 +55,7 @@ class ParsedOutput:
     @property
     def retain_type(self):
         all_types = self.rsnapshot_config.retain_types
-        first_move: str = utils.utils.findLinesStartingWith(self.log, "mv")[0]
+        first_move: str = utils.utils.find_lines_starting_with(self.log, "mv")[0]
         part = first_move.split(" ")[1].split("/")[-2].split(".")[0]
         if part not in all_types:
             print("ERROR: detected retain type {}, but configured are only {}.".format(part, all_types))

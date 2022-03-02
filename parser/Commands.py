@@ -1,7 +1,7 @@
 import datetime
 
 from parser.ResultStates import *
-from utils.utils import findLinesStartingWith, printList
+from utils.utils import find_lines_starting_with, print_list
 
 
 class RsnapshotCommand:
@@ -91,9 +91,9 @@ class BackupCommand(RsnapshotCommand):
 
     @property
     def changed_size(self):
-        printList(self.log)
+        print_list(self.log)
         changed_str = (
-            findLinesStartingWith(self.log, "Total bytes received")[0].split(":")[1].strip()
+            find_lines_starting_with(self.log, "Total bytes received")[0].split(":")[1].strip()
         )
         changed = int(changed_str)
         return changed
@@ -102,7 +102,7 @@ class BackupCommand(RsnapshotCommand):
     def state(self):
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
-        if findLinesStartingWith(self.log, "rsync succeeded"):
+        if find_lines_starting_with(self.log, "rsync succeeded"):
             return SuccessState("rsync succeeded")
 
         return UnknownState("Not implemented")

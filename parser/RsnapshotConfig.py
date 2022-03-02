@@ -1,53 +1,47 @@
-import subprocess
 import os
-from collections.abc import Iterable, Collection
+import subprocess
 
 from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
-from utils.utils import findLinesStartingWith
+from utils.utils import find_lines_starting_with
 
 
 class RsnapshotConfig:
     def __init__(self, custom_configfile, encoding="UTF-8"):
         self.encoding = encoding
-        self.parseConfig(custom_configfile)
+        self._parse_config(custom_configfile)
 
-    def getValuesInConfig(self, key):
+    def get_values_in_config(self, key):
         return list(
             map(
                 lambda line: line.strip().split("\t")[1],
-                findLinesStartingWith(self.lines, key),
+                find_lines_starting_with(self.lines, key),
             )
         )
 
     @property
     def snapshot_root(self):
-        return self.getValuesInConfig("snapshot_root")[0]
+        return self.get_values_in_config("snapshot_root")[0]
 
     @property
     def backup_points(self) -> list[RsnapshotCommand]:
-        backupPoints = []
+        backup_points = []
         for line in self.lines:
             if line.startswith("backup\t"):
                 command = line.strip().split("\t")
-                backupPoints.append(BackupCommand(command[1], command[2]))
+                backup_points.append(BackupCommand(command[1], command[2]))
             elif line.startswith("backup_script"):
                 command = line.strip().split("\t")
-                backupPoints.append(BackupScriptCommand(command[1], command[2]))
+                backup_points.append(BackupScriptCommand(command[1], command[2]))
             elif line.startswith("backup_exec"):
                 command = line.strip().split("\t")
-                backupPoints.append(BackupExecCommand(command[1]))
-        return backupPoints
+                backup_points.append(BackupExecCommand(command[1]))
+        return backup_points
 
     @property
     def retain_types(self):
-        types = []
-        for line in self.lines:
-            if line.startswith("retain"):
-                types.append(line.strip().split("\t")[1])
-        return types
+        return self.get_values_in_config("retain")
 
-    def parseConfig(self, custom_configfile):
-        configfile = ""
+    def _parse_config(self, custom_configfile):
         if custom_configfile:
             configfile = custom_configfile
             if not os.path.isfile(configfile):
@@ -55,10 +49,10 @@ class RsnapshotConfig:
         else:
             configfile = "/etc/rsnapshot.conf"
         with open(configfile, "r", encoding=self.encoding) as config:
-            configLines = self.loadConfig(config)
-            self.lines = configLines
+            config_lines = self._load_config(config)
+            self.lines = config_lines
 
-    def loadConfig(self, configfile):
+    def _load_config(self, configfile):
         result = []
         for line in configfile:
             if line.startswith("#"):
@@ -68,9 +62,9 @@ class RsnapshotConfig:
                 out = subprocess.check_output(
                     command.split(), shell=True, encoding=self.encoding
                 )
-                result += self.loadConfig(out.split("\n"))
+                result += self._load_config(out.split("\n"))
             else:
-                strippedLine = line.strip()
-                if strippedLine:
-                    result.append(strippedLine)
+                stripped_line = line.strip()
+                if stripped_line:
+                    result.append(stripped_line)
         return result

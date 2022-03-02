@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
-import glob
-import os
 
 import modules.modules
 from modules import *
+from modules.outputModule import OutputModule
 from parser.ParsedOutput import ParsedOutput
 from parser.RsnapshotConfig import RsnapshotConfig
 
 UTF_8 = "UTF-8"
 
 
-def getArgs():
+def get_args():
     parser = argparse.ArgumentParser(
         description="This program is used to format the output of rsnapshot and output it to different backends"
     )
@@ -24,27 +23,17 @@ def getArgs():
     return parser.parse_args()
 
 
-def getModule(moduleName):
-    return modules.all_modules[moduleName]
-
-
-def moduleExits(module_name: str):
-    return module_name.lower() in modules.all_modules
-
-
-def outputLog(outputModuleNames, logOutput: ParsedOutput):
-    for moduleName in outputModuleNames:
-        if moduleExits(moduleName):
-            getModule(moduleName.lower()).output(logOutput)
-        else:
-            print("Module {} not found".format(moduleName))
+def output_log(output_module_names: list[str], parsed_output: ParsedOutput):
+    for moduleName in output_module_names:
+        module: OutputModule = modules.get_module(moduleName)
+        module.output(parsed_output)
 
 
 def main():
-    args = getArgs()
+    args = get_args()
     config = RsnapshotConfig(args.configfile)
     parsed_log = ParsedOutput(config, args.input)
-    outputLog(args.output, parsed_log)
+    output_log(args.output, parsed_log)
 
 
 if __name__ == "__main__":
