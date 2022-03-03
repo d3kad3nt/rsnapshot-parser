@@ -9,6 +9,7 @@ def find_first_line_starting_with(lines: Sequence[str], key: str) -> str:
     for line in lines:
         if line.startswith(key):
             return line
+    return ""
 
 
 def print_list(list_to_print: Sequence, end: str = "\n"):
