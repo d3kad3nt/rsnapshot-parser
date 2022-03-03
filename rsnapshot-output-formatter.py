@@ -13,13 +13,10 @@ UTF_8 = "UTF-8"
 
 def get_args() -> argparse.Namespace:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description="This program is used to format the output of rsnapshot and output it to different backends"
+        description="This program is used to format the output of rsnapshot and output it to different modules. "
+                    "It takes the output of rsnapshot from stdin."
     )
-    parser.add_argument("-o", "--output", nargs="+", required=True)
-    parser.add_argument("-i", "--input", required=True)
-    parser.add_argument(
-        "-c", "--configfile", required=False, help="The used Rsnapshot configfile"
-    )
+    parser.add_argument("-m", "--modules", nargs="+", required=True)
     return parser.parse_args()
 
 
@@ -31,9 +28,9 @@ def output_log(output_module_names: Sequence[str], parsed_output: ParsedOutput) 
 
 def main() -> None:
     args: argparse.Namespace = get_args()
-    config: RsnapshotConfig = RsnapshotConfig(args.configfile)
-    parsed_log: ParsedOutput = ParsedOutput(config=config, rsnapshot_output_file= args.input)
-    output_log(output_module_names=args.output, parsed_output=parsed_log)
+    config: RsnapshotConfig = RsnapshotConfig()
+    parsed_log: ParsedOutput = ParsedOutput(config=config)
+    output_log(output_module_names=args.modules, parsed_output=parsed_log)
 
 
 if __name__ == "__main__":

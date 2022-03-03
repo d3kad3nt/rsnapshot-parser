@@ -1,16 +1,18 @@
 import os
 import subprocess
 from collections.abc import Sequence
-from typing import Optional, TextIO, Union
+from typing import TextIO, Union
 
 from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
+from utils.config import Config
 from utils.utils import find_lines_starting_with
 
 
 class RsnapshotConfig:
-    def __init__(self, custom_configfile: Optional[str], encoding: str = "UTF-8"):
+    def __init__(self, encoding: str = "UTF-8"):
         self.encoding: str = encoding
-        self._parse_config(custom_configfile)
+        self._config = Config(section="parser")
+        self._parse_config()
 
     def get_values_in_config(self, key: str) -> Sequence[str]:
         return list(
@@ -47,14 +49,11 @@ class RsnapshotConfig:
     def lines(self) -> Sequence[str]:
         return self._lines
 
-    def _parse_config(self, custom_configfile: Optional[str]) -> None:
-        configfile: str
-        if custom_configfile:
-            configfile = custom_configfile
-            if not os.path.isfile(configfile):
-                raise Exception("The configfile {} doesn't exist.".format(configfile))
-        else:
-            configfile = "/etc/rsnapshot.conf"
+    def _parse_config(self) -> None:
+        configfile: str = self._config.get_value(key="rsnapshot_config", default_value="/etc/rsnapshot.conf")
+        if not os.path.isfile(configfile):
+            raise Exception("The configfile {} doesn't exist.".format(configfile))
+
         with open(configfile, "r", encoding=self.encoding) as config:
             self._lines: Sequence[str] = self._load_config(config)
 

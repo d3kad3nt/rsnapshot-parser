@@ -7,13 +7,14 @@ from parser.ResultStates import FailedState, NotExecutedState, ResultState
 from parser.RsnapshotConfig import RsnapshotConfig
 from utils.config import Config
 from datetime import datetime, timedelta
+from sys import stdin
 
 
 class ParsedOutput:
-    def __init__(self, config: RsnapshotConfig, rsnapshot_output_file: str):
+    def __init__(self, config: RsnapshotConfig):
         self.rsnapshot_config: RsnapshotConfig = config
         self.config: Config = Config(section="parser")
-        self.log: Sequence[str] = self._read_input(rsnapshot_output_file)
+        self.log: Sequence[str] = self._read_input()
         self.backupPoints: Sequence[RsnapshotCommand] = self._parse_backup_points()
         self.end_time: datetime = self.backupPoints[-1].end_time
 
@@ -64,12 +65,10 @@ class ParsedOutput:
         return part
 
     @staticmethod
-    def _read_input(filename: str) -> Sequence[str]:
-        with open(filename, "r", encoding="utf8") as logfile:
-            lines: Sequence[str] = logfile.readlines()
+    def _read_input() -> Sequence[str]:
         multiline_segment: str = ""
         processed_lines: list[str] = []
-        for line in lines:
+        for line in stdin:
             # Rsnapshot cuts long lines into multiple lines seperated by "\"
             if multiline_segment:
                 line = multiline_segment + line[4:]
