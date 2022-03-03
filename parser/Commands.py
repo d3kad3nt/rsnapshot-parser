@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Optional
 
 from parser.ResultStates import *
-from utils.utils import find_lines_starting_with
+from utils.utils import find_first_line_starting_with
 
 
 class RsnapshotCommand:
@@ -101,7 +101,7 @@ class BackupCommand(RsnapshotCommand):
     @property
     def total_files(self) -> int:
         changed_str: str = (
-            find_lines_starting_with(self.log, "Number of files")[0].split(":")[1].strip().split("(")[0].strip()
+            find_first_line_starting_with(self.log, "Number of files").split(":")[1].strip().split("(")[0].strip()
         )
         changed = int(changed_str.replace(",", ""))
         return changed
@@ -109,7 +109,7 @@ class BackupCommand(RsnapshotCommand):
     @property
     def changed_files(self) -> int:
         changed_str: str = (
-            find_lines_starting_with(self.log, "Number of regular files transferred")[0].split(":")[1].strip()
+            find_first_line_starting_with(self.log, "Number of regular files transferred").split(":")[1].strip()
         )
         changed = int(changed_str.replace(",", ""))
         return changed
@@ -117,7 +117,7 @@ class BackupCommand(RsnapshotCommand):
     @property
     def total_size(self) -> int:
         changed_str: str = (
-            find_lines_starting_with(self.log, "Total file size")[0].split(":")[1].strip().split(" ")[0].strip()
+            find_first_line_starting_with(self.log, "Total file size").split(":")[1].strip().split(" ")[0].strip()
         )
         changed = int(changed_str.replace(",", ""))
         return changed
@@ -125,7 +125,7 @@ class BackupCommand(RsnapshotCommand):
     @property
     def changed_size(self) -> int:
         changed_str: str = (
-            find_lines_starting_with(self.log, "Total bytes received")[0].split(":")[1].strip()
+            find_first_line_starting_with(self.log, "Total bytes received").split(":")[1].strip()
         )
         changed = int(changed_str.replace(",", ""))
         return changed
@@ -133,7 +133,7 @@ class BackupCommand(RsnapshotCommand):
     @property
     def copied_size(self) -> int:
         changed_str: str = (
-            find_lines_starting_with(self.log, "Total bytes received")[0].split(":")[1].strip()
+            find_first_line_starting_with(self.log, "Total bytes received").split(":")[1].strip()
         )
         changed = int(changed_str.replace(",", ""))
         return changed
@@ -142,7 +142,7 @@ class BackupCommand(RsnapshotCommand):
     def state(self) -> ResultState:
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
-        if find_lines_starting_with(self.log, "rsync succeeded"):
+        if find_first_line_starting_with(self.log, "rsync succeeded"):
             return SuccessState("rsync succeeded")
 
         return UnknownState("Not implemented")
