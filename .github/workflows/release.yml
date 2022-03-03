@@ -1,0 +1,29 @@
+name: release
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+env:
+  MAINTAINER: 'Christoph Wildhagen'
+  DESC: 'rsnapshot-parser parses the output of rsnapshot'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup deb structure
+        run: |
+          mkdir -p .debpkg/opt/rsnapshot_parser
+          cp -p src/* .debpkg/opt/rsnapshot_parser
+      - uses: jiro4989/build-deb-action@v2
+        with:
+          package: rsnapshot_parser
+          package_root: .debpkg
+          maintainer: ${{env.MAINTAINER}}
+          version: ${{ github.ref }}
+          arch: 'all'
+          desc: '${{ env.DESC }}'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifact-deb
+          path: |
+            ./*.deb
