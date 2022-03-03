@@ -23,7 +23,7 @@ class ParsedOutput:
         current_backup_point_log: list[str] = []
         for line in self.log:
             if (current_backup_point + 1) < len(backup_points) \
-                    and backup_points[current_backup_point + 1].backup_start_line() in line:
+                    and backup_points[current_backup_point + 1].backup_start_line(self.retain_type) in line:
                 if current_backup_point >= 0:
                     backup_points[current_backup_point].log = current_backup_point_log
                 current_backup_point += 1
