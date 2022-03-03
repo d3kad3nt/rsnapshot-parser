@@ -2,17 +2,39 @@ from collections.abc import Sequence
 
 from parser.ParsedOutput import ParsedOutput
 from parser.ResultStates import *
+from utils.config import Config
 from utils.utils import print_list
 from . import outputModule
 
 
 class TextModule(outputModule.OutputModule):
+
+    def __init__(self):
+        self._config: Config = Config(section="text")
+
     def output(self, parsed_output: ParsedOutput):
-        summary = self._summary(parsed_output)
-        errors = self._errors(parsed_output)
-        print_list(summary)
-        print()
-        print_list(errors)
+        output: list[str] = []
+        output += self._summary(parsed_output)
+        output.append("")
+        output += self._errors(parsed_output)
+        formatted_output: list[str] = []
+        for line in output:
+            formatted_output.append(line.rstrip() + "\n")
+        self._to_file(formatted_output)
+        self._to_stdout(formatted_output)
+
+    def _to_file(self, output: Sequence[str]):
+        filepath = self._config.get_value("filepath")
+        print(filepath)
+        if filepath:
+            #TODO error handling with filename
+
+            with open(filepath, "w") as output_file:
+                output_file.writelines(output)
+
+    def _to_stdout(self, output: Sequence[str]):
+        if self._config.get_bool_value("stdout", default_value=False):
+            print_list(output, end="")
 
     @staticmethod
     def _summary(parsed_output: ParsedOutput) -> Sequence[str]:
