@@ -8,7 +8,7 @@ all_modules = {
 }
 
 
-def get_module(module_name: str):
+def get_output_module(module_name: str):
     module_name = module_name.lower()
     if module_name in all_modules:
         return all_modules[module_name]

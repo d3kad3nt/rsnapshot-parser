@@ -1,6 +1,10 @@
 class ResultState:
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, message: str):
+        self._message: str = message
+
+    @property
+    def message(self) -> str:
+        return self._message
 
 
 class UnknownState(ResultState):

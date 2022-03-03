@@ -1,16 +1,18 @@
 import os
 import subprocess
+from collections.abc import Sequence
+from typing import Optional, TextIO, Union
 
 from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
 from utils.utils import find_lines_starting_with
 
 
 class RsnapshotConfig:
-    def __init__(self, custom_configfile, encoding="UTF-8"):
-        self.encoding = encoding
+    def __init__(self, custom_configfile: Optional[str], encoding: str = "UTF-8"):
+        self.encoding: str = encoding
         self._parse_config(custom_configfile)
 
-    def get_values_in_config(self, key):
+    def get_values_in_config(self, key: str) -> Sequence[str]:
         return list(
             map(
                 lambda line: line.strip().split("\t")[1],
@@ -19,12 +21,12 @@ class RsnapshotConfig:
         )
 
     @property
-    def snapshot_root(self):
+    def snapshot_root(self) -> str:
         return self.get_values_in_config("snapshot_root")[0]
 
     @property
-    def backup_points(self) -> list[RsnapshotCommand]:
-        backup_points = []
+    def backup_points(self) -> Sequence[RsnapshotCommand]:
+        backup_points: list[RsnapshotCommand] = []
         for line in self.lines:
             if line.startswith("backup\t"):
                 command = line.strip().split("\t")
@@ -38,10 +40,15 @@ class RsnapshotConfig:
         return backup_points
 
     @property
-    def retain_types(self):
+    def retain_types(self) -> Sequence[str]:
         return self.get_values_in_config("retain")
 
-    def _parse_config(self, custom_configfile):
+    @property
+    def lines(self) -> Sequence[str]:
+        return self._lines
+
+    def _parse_config(self, custom_configfile: Optional[str]) -> None:
+        configfile: str
         if custom_configfile:
             configfile = custom_configfile
             if not os.path.isfile(configfile):
@@ -49,22 +56,21 @@ class RsnapshotConfig:
         else:
             configfile = "/etc/rsnapshot.conf"
         with open(configfile, "r", encoding=self.encoding) as config:
-            config_lines = self._load_config(config)
-            self.lines = config_lines
+            self._lines: Sequence[str] = self._load_config(config)
 
-    def _load_config(self, configfile):
-        result = []
+    def _load_config(self, configfile: Union[TextIO, Sequence[str]]) -> Sequence[str]:
+        result: list[str] = []
         for line in configfile:
             if line.startswith("#"):
                 continue
             elif "include_conf" in line:
-                command = line.split("\t")[1].replace("`", "")
-                out = subprocess.check_output(
+                command: str = line.split("\t")[1].replace("`", "")
+                out: str = subprocess.check_output(
                     command.split(), shell=True, encoding=self.encoding
                 )
                 result += self._load_config(out.split("\n"))
             else:
-                stripped_line = line.strip()
+                stripped_line: str = line.strip()
                 if stripped_line:
                     result.append(stripped_line)
         return result

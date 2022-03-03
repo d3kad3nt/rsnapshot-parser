@@ -1,23 +1,26 @@
+from collections.abc import Sequence
+from typing import Type
+
 import utils.utils
 from parser.Commands import RsnapshotCommand, BackupExecCommand
-from parser.ResultStates import FailedState, NotExecutedState
+from parser.ResultStates import FailedState, NotExecutedState, ResultState
 from parser.RsnapshotConfig import RsnapshotConfig
 from utils.config import Config
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class ParsedOutput:
     def __init__(self, config: RsnapshotConfig, rsnapshot_output_file: str):
         self.rsnapshot_config: RsnapshotConfig = config
         self.config: Config = Config(section="parser")
-        self.log = self._read_input(rsnapshot_output_file)
-        self.backupPoints: list[RsnapshotCommand] = self._parse_backup_points()
-        self.end_time = self.backupPoints[-1].end_time
+        self.log: Sequence[str] = self._read_input(rsnapshot_output_file)
+        self.backupPoints: Sequence[RsnapshotCommand] = self._parse_backup_points()
+        self.end_time: datetime = self.backupPoints[-1].end_time
 
-    def _parse_backup_points(self):
-        backup_points = self.rsnapshot_config.backup_points
-        current_backup_point = -1
-        current_backup_point_log = []
+    def _parse_backup_points(self) -> Sequence[RsnapshotCommand]:
+        backup_points: Sequence[RsnapshotCommand] = self.rsnapshot_config.backup_points
+        current_backup_point: int = -1
+        current_backup_point_log: list[str] = []
         for line in self.log:
             if (current_backup_point + 1) < len(backup_points) \
                     and backup_points[current_backup_point + 1].backup_start_line() in line:
@@ -28,10 +31,9 @@ class ParsedOutput:
             current_backup_point_log.append(line)
         backup_points[current_backup_point].log = current_backup_point_log
         for i, backupPoint in enumerate(backup_points):
-            if type(backupPoint) is BackupExecCommand:
-                backupPoint: BackupExecCommand
+            if isinstance(backupPoint, BackupExecCommand):
                 if backupPoint.command.startswith("/bin/date"):
-                    time = datetime.fromtimestamp(int(backupPoint.log[1]))
+                    time: datetime = datetime.fromtimestamp(int(backupPoint.log[1]))
                     if i > 1:
                         backup_points[i-1].end_time = time
                     if i < (len(backup_points) - 1):
@@ -42,19 +44,19 @@ class ParsedOutput:
         return backup_points
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime:
         time_format = "%H:%M"
         start_time_str = self.config.get_value(key="start_{}".format(self.retain_type))
-        start_time = datetime.strptime(start_time_str, time_format)
+        start_time: datetime = datetime.strptime(start_time_str, time_format)
         return datetime.combine(self.backupPoints[0].start_time.date(), start_time.time())
 
     @property
-    def duration(self):
+    def duration(self) -> timedelta:
         return self.end_time - self.start_time
 
     @property
-    def retain_type(self):
-        all_types = self.rsnapshot_config.retain_types
+    def retain_type(self) -> str:
+        all_types: Sequence[str] = self.rsnapshot_config.retain_types
         first_move: str = utils.utils.find_lines_starting_with(self.log, "mv")[0]
         part = first_move.split(" ")[1].split("/")[-2].split(".")[0]
         if part not in all_types:
@@ -62,11 +64,11 @@ class ParsedOutput:
         return part
 
     @staticmethod
-    def _read_input(filename: str):
+    def _read_input(filename: str) -> Sequence[str]:
         with open(filename, "r", encoding="utf8") as logfile:
-            lines = logfile.readlines()
-        multiline_segment = ""
-        processed_lines = []
+            lines: Sequence[str] = logfile.readlines()
+        multiline_segment: str = ""
+        processed_lines: list[str] = []
         for line in lines:
             # Rsnapshot cuts long lines into multiple lines seperated by "\"
             if multiline_segment:
@@ -78,27 +80,27 @@ class ParsedOutput:
                 processed_lines.append(line)
         return processed_lines
 
-    def commands_with_state_count(self, state):
+    def commands_with_state_count(self, state: Type[ResultState]) -> int:
         return len(self.commands_with_state(state))
 
-    def commands_with_state(self, state):
-        result = []
+    def commands_with_state(self, state: Type[ResultState]) -> Sequence[RsnapshotCommand]:
+        result: list[RsnapshotCommand] = []
         for backupPoint in self.backupPoints:
             if isinstance(backupPoint.state, state):
                 result.append(backupPoint)
         return result
 
-    def commands_not_with_state_count(self, state):
+    def commands_not_with_state_count(self, state: Type[ResultState]) -> int:
         return len(self.commands_not_with_state(state))
 
-    def commands_not_with_state(self, state):
-        result = []
+    def commands_not_with_state(self, state: Type[ResultState]) -> Sequence[RsnapshotCommand]:
+        result: list[RsnapshotCommand] = []
         for backupPoint in self.backupPoints:
             if not isinstance(backupPoint.state, state):
                 result.append(backupPoint)
         return result
 
     @property
-    def successful(self):
+    def successful(self) -> bool:
         return self.commands_with_state_count(FailedState) == 0 \
                and self.commands_with_state_count(NotExecutedState) == 0
