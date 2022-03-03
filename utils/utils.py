@@ -8,3 +8,20 @@ def find_lines_starting_with(lines: Sequence[str], key: str) -> Sequence[str]:
 def print_list(list_to_print: Sequence, end: str = "\n"):
     for line in list_to_print:
         print(line, end=end)
+
+
+def format_bytes(number_of_bytes: int) -> str:
+    unit = "bytes"
+    bytes_float = float(number_of_bytes)
+    if bytes_float/1024 > 1:
+        unit = "KB"
+        bytes_float = bytes_float/1024
+    else:
+        return "{} {}".format(number_of_bytes, unit)
+    if bytes_float/1024 > 1:
+        unit = "MB"
+        bytes_float = bytes_float/1024
+    if bytes_float/1024 > 1:
+        unit = "GB"
+        bytes_float = bytes_float/1024
+    return "{:.3f} {}".format(bytes_float, unit)
