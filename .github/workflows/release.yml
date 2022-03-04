@@ -45,7 +45,7 @@ jobs:
       - name: version
         id: version
         run: |
-          echo "::set-output name=version::$(echo ${{ github.ref_name }}" | cut -c 2-)"
+          echo "::set-output name=version::$(echo "${{ github.ref_name }}" | cut -c 2-)"
       - name: upload linux artifact
         uses: actions/upload-release-asset@v1
         env:
