@@ -1,9 +1,0 @@
-root/
-	rsnapshot-output-formatter.py
-	adapter/
-		__init__.py
-		telegram-adapter.py
-		mail-adapter.py
-	formatter/
-		__init__.py
-		default-formatter.py
