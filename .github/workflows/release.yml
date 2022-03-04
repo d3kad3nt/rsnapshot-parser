@@ -22,7 +22,7 @@ jobs:
           cp config/rsnapshot_parser.conf .debpkg/etc
       - uses: jiro4989/build-deb-action@v2
         with:
-          package: rsnapshot_parser
+          package: rsnapshot-parser
           package_root: .debpkg
           maintainer: ${{env.MAINTAINER}}
           depends: 'python3 (<=3.9)'
