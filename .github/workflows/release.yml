@@ -42,6 +42,9 @@ jobs:
           release_name: ${{ github.ref }}
           draft: true
           prerelease: false
+      - name: debug
+        run: |
+          ls
       - name: upload linux artifact
         uses: actions/upload-release-asset@v1
         env:
