@@ -42,15 +42,16 @@ jobs:
           release_name: ${{ github.ref }}
           draft: true
           prerelease: false
-      - name: debug
+      - name: version
+        id: version
         run: |
-          ls
+          echo "${{ github.ref_name }}" | cut -c 2-
       - name: upload linux artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./rsnapshot-parser_${{ github.ref_name }}_all.deb
-          asset_name: rsnapshot-parser_${{ github.ref_name }}.deb
+          asset_path: ./rsnapshot-parser_${{ steps.version.outputs.version }}_all.deb
+          asset_name: rsnapshot-parser_${{ steps.version.outputs.version }}.deb
           asset_content_type: application/vnd.debian.binary-package
