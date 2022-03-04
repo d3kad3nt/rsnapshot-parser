@@ -47,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: .rsnapshot-parser_${{ github.ref }}_all.deb
-          asset_name: rsnapshot-parser_${{ github.ref }}.deb
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: .rsnapshot-parser_${{ github.ref_name }}_all.deb
+          asset_name: rsnapshot-parser_${{ github.ref_name }}.deb
           asset_content_type: application/vnd.debian.binary-package
