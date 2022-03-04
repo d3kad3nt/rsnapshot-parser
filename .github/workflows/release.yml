@@ -14,8 +14,6 @@ jobs:
         uses: actions/checkout@v2
       - name: setup deb structure
         run: |
-          ls ${{ github.workspace }}
-          ls
           mkdir -p .debpkg/opt/rsnapshot_parser
           cp -r src/* .debpkg/opt/rsnapshot_parser
           mkdir -p .debpkg/etc
@@ -29,8 +27,30 @@ jobs:
           version: ${{ github.ref }}
           arch: 'all'
           desc: '${{ env.DESC }}'
+      - name: debug get package name
+        run: |
+          ls
       - uses: actions/upload-artifact@v2
         with:
           name: artifact-deb
           path: |
             ./*.deb
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
+      - name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: .rsnapshot-parser.deb
+          asset_name: rsnapshot-parser.deb
+          asset_content_type: application/vnd.debian.binary-package
