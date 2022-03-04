@@ -10,13 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository code
+        uses: actions/checkout@v2
       - name: setup deb structure
         run: |
+          ls ${{ github.workspace }}
+          ls
           mkdir -p .debpkg/opt/rsnapshot_parser
           cp -r src/* .debpkg/opt/rsnapshot_parser
           mkdir -p .debpkg/etc
-          ls
           cp config/rsnapshot_parser.conf .debpkg/etc
       - uses: jiro4989/build-deb-action@v2
         with:
