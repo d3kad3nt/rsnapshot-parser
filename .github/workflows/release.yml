@@ -15,6 +15,7 @@ jobs:
           mkdir -p .debpkg/opt/rsnapshot_parser
           cp -r src/* .debpkg/opt/rsnapshot_parser
           mkdir -p .debpkg/etc
+          ls
           cp config/rsnapshot_parser.conf .debpkg/etc
       - uses: jiro4989/build-deb-action@v2
         with:
