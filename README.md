@@ -5,7 +5,12 @@ This tool parses the output of Rsnapshot and outputs it through different module
 ##Usage
 
 This tool is intended to be used with rsnapshot. It can be used in a pipe, where the output of rsnapshot is piped 
-directly into rsnapshot-parser. The outputlevel in 
+directly into rsnapshot-parser. The Option "verbose" in the rsnaphsot config has to be set to "5".
+
+The programm takes one required argument, the used modules. They can be given via the option "-m" or "--modules" and 
+are a space seperated list.
+A complete call can look something like this:
+/usr/local/bin/rsnapshot beta | /opt/rsnapshot_parser/rsnapshot-parser -m text gotify
 
 ##Config
 
@@ -14,6 +19,8 @@ That file is in ini Format and divided into multiple sections.
 The first section is called "parser". This section contains settings that are relevant when the rsnapshot output is 
 parsed.  
 The other sections are from the modules, where each section has the same name as the module.
+
+Each setting is described in the config.
 
 ##Modules
 
