@@ -131,14 +131,6 @@ class BackupCommand(RsnapshotCommand):
         return changed
 
     @property
-    def copied_size(self) -> int:
-        changed_str: str = (
-            find_first_line_starting_with(self.log, "Total bytes received").split(":")[1].strip()
-        )
-        changed = int(changed_str.replace(",", ""))
-        return changed
-
-    @property
     def state(self) -> ResultState:
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")

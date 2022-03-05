@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Type
 
 import utils.utils
-from parser.Commands import RsnapshotCommand, BackupExecCommand
+from parser.Commands import RsnapshotCommand, BackupExecCommand, BackupCommand
 from parser.ResultStates import FailedState, NotExecutedState, ResultState
 from parser.RsnapshotConfig import RsnapshotConfig
 from utils.config import Config
@@ -56,6 +56,14 @@ class ParsedOutput:
         return self.end_time - self.start_time
 
     @property
+    def duration_copy(self) -> timedelta:
+        return self.backupPoints[0].start_time - self.start_time
+
+    @property
+    def duration_backup(self) -> timedelta:
+        return self.end_time - self.backupPoints[0].start_time
+
+    @property
     def retain_type(self) -> str:
         all_types: Sequence[str] = self.rsnapshot_config.retain_types
         first_move: str = utils.utils.find_first_line_starting_with(self.log, "mv")
@@ -63,6 +71,22 @@ class ParsedOutput:
         if part not in all_types:
             print("ERROR: detected retain type {}, but configured are only {}.".format(part, all_types))
         return part
+
+    @property
+    def changed_files(self) -> int:
+        changed_files = 0
+        for backupPoint in self.backupPoints:
+            if isinstance(backupPoint, BackupCommand):
+                changed_files += backupPoint.changed_files
+        return changed_files
+
+    @property
+    def changed_size(self) -> int:
+        changed_files = 0
+        for backupPoint in self.backupPoints:
+            if isinstance(backupPoint, BackupCommand):
+                changed_files += backupPoint.changed_files
+        return changed_files
 
     @staticmethod
     def _read_input() -> Sequence[str]:

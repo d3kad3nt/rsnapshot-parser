@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from parser.Commands import BackupCommand, BackupExecCommand
+from parser.Commands import BackupCommand, BackupExecCommand, RsnapshotCommand
 from parser.ParsedOutput import ParsedOutput
 from parser.ResultStates import *
 from utils.config import Config
@@ -19,6 +19,7 @@ class TextModule(outputModule.OutputModule):
         output += self._summary(parsed_output)
         output += self._errors(parsed_output)
         output += self._list_backup_points(parsed_output)
+        output += self._statistics(parsed_output)
         formatted_output: list[str] = []
         for line in output:
             formatted_output.append(line.rstrip() + "\n")
@@ -47,6 +48,7 @@ class TextModule(outputModule.OutputModule):
                 parsed_output.commands_with_state_count(SuccessState)),
             "{} Backup Commands failed".format(parsed_output.commands_with_state_count(FailedState)),
             "{} Backup Commands not executed".format(parsed_output.commands_with_state_count(NotExecutedState)),
+            "Copied {} files with {}".format(parsed_output.changed_files, format_bytes(parsed_output.changed_size)),
             ""]
         return output
 
@@ -84,4 +86,30 @@ class TextModule(outputModule.OutputModule):
                 output.append("\tChanged size:\t{}".format(format_bytes(backup_point.changed_size)))
                 output.append("\tTotal files:\t{}".format(backup_point.total_files))
                 output.append("\tChanged files:\t{}".format(backup_point.changed_files))
+        output.append("")
+        return output
+
+    @staticmethod
+    def _statistics(parsed_output: ParsedOutput) -> Sequence[str]:
+        output: list[str] = [
+            "Statistics:",
+            "Total Time: {}".format(parsed_output.duration),
+            "Time to copy and delete old versions: {}".format(parsed_output.duration_copy),
+            "Time to execute backup actions: {}".format(parsed_output.duration_backup),
+        ]
+        backup_points:Sequence[RsnapshotCommand] = parsed_output.backupPoints
+        if isinstance(backup_points, list):
+            output.append("Longest backup actions:")
+            backup_points.sort(key=lambda x: x.duration, reverse=True)
+            for i in range(5):
+                output.append("{}.: {} ({})".format(i+1, backup_points[i], backup_points[i].duration))
+            backup_actions: list[BackupCommand] = [x for x in backup_points if isinstance(x, BackupCommand)]
+            output.append("Most files transferred:")
+            backup_actions.sort(key=lambda x: x.changed_files, reverse=True)
+            for i in range(5):
+                output.append("{}.: {} ({} files)".format(i+1, backup_actions[i], backup_actions[i].changed_files))
+            output.append("Most data transferred:")
+            backup_actions.sort(key=lambda x: x.changed_size, reverse=True)
+            for i in range(5):
+                output.append("{}.: {} ({})".format(i+1, backup_actions[i], format_bytes(backup_actions[i].changed_size)))
         return output
