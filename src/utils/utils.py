@@ -32,3 +32,8 @@ def format_bytes(number_of_bytes: int) -> str:
         unit = "GB"
         bytes_float = bytes_float/1024
     return "{:.3f} {}".format(bytes_float, unit)
+
+
+def comma_seperated(input_list: Sequence[str]) -> str:
+    return ",".join(input_list)
+

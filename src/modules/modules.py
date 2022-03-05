@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from typing import Type
 
 from modules.gotify import GotifyModule
@@ -11,10 +11,6 @@ all_modules: Iterable[Type[OutputModule]] = {
 }
 
 
-def _get_name(module: Type[OutputModule]):
-    return module.name
-
-
 def get_output_module(module_name: str):
     module_name = module_name.lower()
     for module in all_modules:
@@ -23,3 +19,10 @@ def get_output_module(module_name: str):
     else:
         print("Module {} not found".format(module_name))
         return EmptyModule()
+
+
+def get_all_module_names() -> Sequence[str]:
+    names: list[str] = []
+    for module in all_modules:
+        names.append(module.name)
+    return names
