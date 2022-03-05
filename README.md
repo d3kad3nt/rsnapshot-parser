@@ -21,3 +21,9 @@ Currently, only 2 modules exist, but it is easy to add new modules.
 
 ###Text
 This module outputs plain text either to a file or the terminal.
+
+The text contains different infos about the backup like the number of files that were changed, or the time
+of the backup (if configured)
+
+###Gotify
+This module outputs a short message to a gotify server if the backup was successful or not.
