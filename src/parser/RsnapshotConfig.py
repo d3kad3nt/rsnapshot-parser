@@ -1,11 +1,12 @@
 import os
 import subprocess
+import sys
 from collections.abc import Sequence
 from typing import TextIO, Union
 
 from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
 from utils.config import Config
-from utils.utils import find_lines_starting_with
+from utils.utils import find_lines_starting_with, find_first_line_starting_with, split_by_tab
 
 
 class RsnapshotConfig:
@@ -13,37 +14,41 @@ class RsnapshotConfig:
         self.encoding: str = encoding
         self._config = Config(section="parser")
         self._parse_config()
+        self._check_verbose_level()
 
-    def get_values_in_config(self, key: str) -> Sequence[str]:
+    def _get_values_in_config(self, key: str) -> Sequence[str]:
         return list(
             map(
-                lambda line: line.strip().split("\t")[1],
+                lambda line: split_by_tab(line)[1],
                 find_lines_starting_with(self.lines, key),
             )
         )
 
+    def _get_first_value_in_config(self, key: str) -> str:
+        return split_by_tab(find_first_line_starting_with(self.lines, key))[1].strip()
+
     @property
     def snapshot_root(self) -> str:
-        return self.get_values_in_config("snapshot_root")[0]
+        return self._get_first_value_in_config("snapshot_root")
 
     @property
     def backup_points(self) -> Sequence[RsnapshotCommand]:
         backup_points: list[RsnapshotCommand] = []
         for line in self.lines:
             if line.startswith("backup\t"):
-                command = line.strip().split("\t")
+                command = split_by_tab(line)
                 backup_points.append(BackupCommand(command[1], command[2]))
             elif line.startswith("backup_script"):
-                command = line.strip().split("\t")
+                command = split_by_tab(line)
                 backup_points.append(BackupScriptCommand(command[1], command[2]))
             elif line.startswith("backup_exec"):
-                command = line.strip().split("\t")
+                command = split_by_tab(line)
                 backup_points.append(BackupExecCommand(command[1]))
         return backup_points
 
     @property
     def retain_types(self) -> Sequence[str]:
-        return self.get_values_in_config("retain")
+        return self._get_values_in_config("retain")
 
     @property
     def lines(self) -> Sequence[str]:
@@ -63,7 +68,7 @@ class RsnapshotConfig:
             if line.startswith("#"):
                 continue
             elif "include_conf" in line:
-                command: str = line.split("\t")[1].replace("`", "")
+                command: str = split_by_tab(line)[1].replace("`", "")
                 out: str = subprocess.check_output(
                     command.split(), shell=True, encoding=self.encoding
                 )

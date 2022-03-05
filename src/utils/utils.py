@@ -37,3 +37,11 @@ def format_bytes(number_of_bytes: int) -> str:
 def comma_seperated(input_list: Sequence[str]) -> str:
     return ",".join(input_list)
 
+
+def split_by_tab(input_str: str) -> Sequence[str]:
+    result: list[str] = []
+    for part in input_str.strip().split("\t"):
+        #Remove empty strings, if two tabs are following each other
+        if part:
+            result.append(part)
+    return result
