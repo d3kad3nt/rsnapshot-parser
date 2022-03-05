@@ -9,9 +9,10 @@ from . import outputModule
 
 
 class TextModule(outputModule.OutputModule):
+    name = "Text"
 
     def __init__(self):
-        self._config: Config = Config(section="text")
+        self._config: Config = Config(section=self.name.lower())
 
     def output(self, parsed_output: ParsedOutput):
         output: list[str] = []
