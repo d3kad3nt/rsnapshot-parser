@@ -54,6 +54,10 @@ class RsnapshotConfig:
     def lines(self) -> Sequence[str]:
         return self._lines
 
+    @property
+    def verbose_level(self) -> int:
+        return int(self._get_first_value_in_config("verbose"))
+
     def _parse_config(self) -> None:
         configfile: str = self._config.get_value(key="rsnapshot_config", default_value="/etc/rsnapshot.conf")
         if not os.path.isfile(configfile):
@@ -78,3 +82,7 @@ class RsnapshotConfig:
                 if stripped_line:
                     result.append(stripped_line)
         return result
+
+    def _check_verbose_level(self):
+        if self.verbose_level < 5:
+            print("The verbose level of Rsnapshot has to be 5.", file=sys.stderr)
