@@ -20,6 +20,11 @@ class Config:
             return self._parser.getboolean(section=self._section, option=key)
         return default_value
 
+    def get_int(self, key: str, default_value: int = False) -> int:
+        if self._parser.has_option(section=self._section, option=key):
+            return self._parser.getint(section=self._section, option=key)
+        return default_value
+
     def get_str_list(self, key: str, default_value=None) -> Sequence[str]:
         if self._parser.has_option(section=self._section, option=key):
             return list(map(str.strip, self._parser.get(section=self._section, option=key).split(",")))

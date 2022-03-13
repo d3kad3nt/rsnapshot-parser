@@ -1,6 +1,7 @@
 from collections.abc import Iterable, Sequence
 from typing import Type
 
+from parser.ParsedOutput import ParsedOutput
 from provider.backup_point_list_provider import BackupPointListProvider
 from provider.error_provider import ErrorProvider
 from provider.statistics_provider import StatisticsProvider
@@ -30,3 +31,13 @@ def get_all_module_names() -> Sequence[str]:
     for provider in all_providers:
         names.append(provider.name())
     return names
+
+
+def get_text_from_providers(providers: Sequence[str], parsed_output: ParsedOutput) -> Sequence[str]:
+    output: list[str] = []
+    for provider in providers:
+        lines = get_provider(provider).text(parsed_output)
+        for line in lines:
+            output.append(line.rstrip() + "\n")
+        output.append("\n")
+    return output
