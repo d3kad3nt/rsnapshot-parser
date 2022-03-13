@@ -1,14 +1,24 @@
+import abc
+
 from parser.ParsedOutput import ParsedOutput
 
 
-class OutputModule:
+class OutputModule(abc.ABC):
 
-    name = "OutputModule"
+    @classmethod
+    @abc.abstractmethod
+    def name(cls) -> str:
+        pass
 
-    def output(self, parsed_output: ParsedOutput):
-        raise Exception("Not implemented in specific Module")
+    @abc.abstractmethod
+    def output(self, parsed_output: ParsedOutput) -> None:
+        pass
 
 
 class EmptyModule(OutputModule):
+    @property
+    def name(self) -> str:
+        return "Empty Module"
+
     def output(self, parsed_output: ParsedOutput):
         pass

@@ -9,10 +9,13 @@ from utils.config import Config
 
 
 class GotifyModule(OutputModule):
-    name = "Gotify"
+
+    @classmethod
+    def name(cls) -> str:
+        return "Gotify"
 
     def __init__(self):
-        self._config = Config(section=self.name.lower())
+        self._config = Config(section=self.name().lower())
         self._url = self._config.get_value(key="url")
         self._api_token = self._config.get_value(key="api_token")
 
