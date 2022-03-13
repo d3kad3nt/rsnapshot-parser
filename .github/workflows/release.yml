@@ -23,7 +23,7 @@ jobs:
           package: rsnapshot-parser
           package_root: .debpkg
           maintainer: ${{env.MAINTAINER}}
-          depends: 'python3 (<=3.9)'
+          depends: 'python3 (>=3.9)'
           version: ${{ github.ref }}
           arch: 'all'
           desc: '${{ env.DESC }}'
