@@ -59,7 +59,7 @@ class RsnapshotConfig:
         return int(self._get_first_value_in_config("verbose"))
 
     def _parse_config(self) -> None:
-        configfile: str = self._config.get_value(key="rsnapshot_config", default_value="/etc/rsnapshot.conf")
+        configfile: str = self._config.get_str(key="rsnapshot_config", default_value="/etc/rsnapshot.conf")
         if not os.path.isfile(configfile):
             raise Exception("The configfile {} doesn't exist.".format(configfile))
 

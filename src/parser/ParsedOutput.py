@@ -47,7 +47,7 @@ class ParsedOutput:
     @property
     def start_time(self) -> datetime:
         time_format = "%H:%M"
-        start_time_str = self.config.get_value(key="start_{}".format(self.retain_type))
+        start_time_str = self.config.get_str(key="start_{}".format(self.retain_type))
         start_time: datetime = datetime.strptime(start_time_str, time_format)
         return datetime.combine(self.backupPoints[0].start_time.date(), start_time.time())
 

@@ -4,16 +4,18 @@ from typing import Type
 from modules.email import EMailModule
 from modules.gotify import GotifyModule
 from modules.outputModule import EmptyModule, OutputModule
-from modules.text import TextModule
+from modules.file import FileModule
+from modules.stdout import StdoutModule
 
 all_modules: Iterable[Type[OutputModule]] = {
-    TextModule,
+    FileModule,
     GotifyModule,
-    EMailModule
+    EMailModule,
+    StdoutModule
 }
 
 
-def get_output_module(module_name: str):
+def get_output_module(module_name: str) -> OutputModule:
     module_name = module_name.lower()
     for module in all_modules:
         if module.name().lower() == module_name:

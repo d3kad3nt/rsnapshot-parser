@@ -1,0 +1,25 @@
+import abc
+from collections.abc import Sequence
+
+from parser.ParsedOutput import ParsedOutput
+
+
+class TextProvider(abc.ABC):
+    @classmethod
+    @abc.abstractmethod
+    def name(cls) -> str:
+        pass
+
+    @abc.abstractmethod
+    def text(self, parsed_output: ParsedOutput) -> Sequence[str]:
+        pass
+
+
+class EmptyTextProvider(TextProvider):
+
+    @classmethod
+    def name(cls) -> str:
+        return "EmptyText"
+
+    def text(self, _: ParsedOutput) -> Sequence[str]:
+        return []

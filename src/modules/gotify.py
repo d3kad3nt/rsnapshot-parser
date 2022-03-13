@@ -16,8 +16,8 @@ class GotifyModule(OutputModule):
 
     def __init__(self):
         self._config = Config(section=self.name().lower())
-        self._url = self._config.get_value(key="url")
-        self._api_token = self._config.get_value(key="api_token")
+        self._url = self._config.get_str(key="url")
+        self._api_token = self._config.get_str(key="api_token")
 
     def output(self, log_output: ParsedOutput):
         if log_output.successful:
