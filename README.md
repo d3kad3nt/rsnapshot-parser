@@ -24,13 +24,22 @@ Each setting is described in the config.
 
 ## Modules
 
-Currently, only 2 modules exist, but it is easy to add new modules.
+There are currently 4 output modules and it is easy to add more.
+The modules are: Email, File, Stdout and Gotify
 
-### Text
-This module outputs plain text either to a file or the terminal.
+### Email
+This module can send emails to defined address. 
+It can communicate per SSL/TLS and StartTLS with the email server
+The E-Mail can contain content from all Text Providers
 
-The text contains different infos about the backup like the number of files that were changed, or the time
-of the backup (if configured)
+### File
+This module outputs plain text to a file that is defined in the config.
+The File can contain content from all Text Providers
+
+### Stdout
+This module outputs plain text to stdout. 
+This is the only output to stdout by this script.  
+The Output can contain content from all Text Providers
 
 ### Gotify
 This module outputs a short message to a gotify server if the backup was successful or not.
