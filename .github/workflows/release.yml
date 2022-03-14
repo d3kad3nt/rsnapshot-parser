@@ -18,6 +18,10 @@ jobs:
           cp -r src/* .debpkg/opt/rsnapshot_parser
           mkdir -p .debpkg/etc
           cp config/rsnapshot_parser.conf .debpkg/etc
+          mkdir -p .debpkg/DEBIAN
+          cp -r packages/deb/* .debpkg/DEBIAN
+          chown -R root:root .debpkg
+          chmod +x .debpkg/opt/rsnapshot_parser/rsnapshot_parser
       - uses: jiro4989/build-deb-action@v2
         with:
           package: rsnapshot-parser
