@@ -13,9 +13,12 @@ class ErrorProvider(TextProvider):
     def text(self, parsed_output: ParsedOutput) -> Sequence[str]:
         failed = parsed_output.commands_with_state(FailedState)
         not_executed = parsed_output.commands_with_state(NotExecutedState)
-        if len(failed) == 0 and len(not_executed) == 0:
+        if parsed_output.successful:
             return ["No Errors", ""]
-        output = []
+        output = ["ERRORS:"]
+        if parsed_output.empty_log:
+            output.append("The Rsnapshot Output is empty")
+            output.append("This is probably a sign, that rsnapshot encountered an error")
         if failed:
             output.append("{} Commands failed:")
             for failed_command in failed:

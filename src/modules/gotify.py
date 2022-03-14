@@ -25,7 +25,7 @@ class GotifyModule(OutputModule):
             self._send_message(title="Backup Successful", message=message, priority=3)
 
         else:
-            message = "{} Backup Points failed".format(log_output.commands_with_state_count(FailedState))
+            message = self._failed_backup_message(log_output)
             self._send_message(title="Backup Failed", message=message, priority=9)
 
     def _send_message(self, title, message, priority=5):
@@ -41,3 +41,12 @@ class GotifyModule(OutputModule):
                                          method="POST",
                                          data=query_string.encode("ascii"))
         urllib.request.urlopen(request)
+
+    @staticmethod
+    def _failed_backup_message(parsed_output: ParsedOutput):
+        if parsed_output.empty_log:
+            return "The Log is empty"
+        elif parsed_output.commands_with_state_count(FailedState) > 0:
+            return "{} Backup Points failed".format(parsed_output.commands_with_state_count(FailedState))
+        else:
+            return "Unknown Error"

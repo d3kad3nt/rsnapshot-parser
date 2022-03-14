@@ -13,7 +13,7 @@ class BackupPointListProvider(TextProvider):
 
     def text(self, parsed_output: ParsedOutput) -> Sequence[str]:
         output: list[str] = ["Backup Actions:"]
-        for backup_point in parsed_output.backupPoints:
+        for backup_point in parsed_output.backup_points:
             if isinstance(backup_point, BackupExecCommand) and backup_point.command.startswith("/bin/date"):
                 continue
             output.append(str(backup_point))
