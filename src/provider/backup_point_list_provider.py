@@ -17,11 +17,11 @@ class BackupPointListProvider(TextProvider):
             if isinstance(backup_point, BackupExecCommand) and backup_point.command.startswith("/bin/date"):
                 continue
             output.append(str(backup_point))
-            output.append("\tTime:\t\t\t{}".format(backup_point.duration))
+            output.append("\tTime:          {}".format(backup_point.duration))
             if isinstance(backup_point, BackupCommand):
-                output.append("\tTotal size:\t\t{}".format(format_bytes(backup_point.total_size)))
-                output.append("\tChanged size:\t{}".format(format_bytes(backup_point.changed_size)))
-                output.append("\tTotal files:\t{}".format(backup_point.total_files))
-                output.append("\tChanged files:\t{}".format(backup_point.changed_files))
+                output.append("\tTotal size:    {}".format(format_bytes(backup_point.total_size)))
+                output.append("\tChanged size:  {}".format(format_bytes(backup_point.changed_size)))
+                output.append("\tTotal files:   {}".format(backup_point.total_files))
+                output.append("\tChanged files: {}".format(backup_point.changed_files))
         output.append("")
         return output
