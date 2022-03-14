@@ -1,5 +1,6 @@
 import smtplib
 import ssl
+import email.message
 from collections.abc import Sequence
 
 from modules import outputModule
@@ -21,14 +22,23 @@ class EMailModule(outputModule.OutputModule):
         providers = self._config.get_str_list("providers", ["Summary"])
         output: Sequence[str] = get_text_from_providers(providers, parsed_output)
         subject: str = self.get_subject(parsed_output)
-        message: str = "Subject: {}\n\n".format(subject)
-        message += "".join(output)
+
         password = self._config.get_str("password")
         sender_address = self._config.get_str("sender_address")
         receiver_address = self._config.get_str("receiver_address")
+        sender_name = self._config.get_str("sender_name")
+        message: email.message.Message = email.message.Message()
+        if sender_name:
+            message['From'] = "{} <{}>".format(sender_name, sender_address)
+        else:
+            message['From'] = sender_address
+        message['To'] = receiver_address
+        message['Subject'] = subject
+        message.set_payload("".join(output))
+
         with self.get_connection() as server:
             server.login(user=sender_address, password=password)
-            server.sendmail(from_addr=sender_address, to_addrs=receiver_address, msg=message)
+            server.sendmail(from_addr=sender_address, to_addrs=receiver_address, msg=message.as_string())
 
     def get_connection(self):
         encryption = self._config.get_str("encryption", "SSL")
