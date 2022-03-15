@@ -122,11 +122,11 @@ class ParsedOutput:
 
     @property
     def changed_size(self) -> int:
-        changed_files = 0
+        changed_size = 0
         for backupPoint in self._backupPoints:
             if isinstance(backupPoint, BackupCommand):
-                changed_files += backupPoint.changed_files
-        return changed_files
+                changed_size += backupPoint.changed_size
+        return changed_size
 
     @staticmethod
     def _read_input() -> Sequence[str]:
