@@ -1,6 +1,8 @@
 import json
+import sys
 import urllib.parse
 import urllib.request
+from urllib.error import URLError
 
 from modules.outputModule import OutputModule
 from parser.ParsedOutput import ParsedOutput
@@ -40,7 +42,10 @@ class GotifyModule(OutputModule):
                                          headers={"Content-Type": "application/json"},
                                          method="POST",
                                          data=query_string.encode("ascii"))
-        urllib.request.urlopen(request)
+        try:
+            urllib.request.urlopen(request)
+        except URLError as e:
+            print("Error while connecting to gotify: {}".format(e), file=sys.stderr)
 
     @staticmethod
     def _failed_backup_message(parsed_output: ParsedOutput):
