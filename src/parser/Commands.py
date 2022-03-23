@@ -99,6 +99,21 @@ class BackupCommand(RsnapshotCommand):
         return "{} /mnt/Backup/{}.0/{}".format(self.source, retain_type, self.destination)
 
     @property
+    def errormessage(self) -> str:
+        error_line = find_first_line_starting_with(self.log, "rsync error")
+        if error_line:
+            rsync_message: str = error_line.split(":")[1].strip()
+            if rsync_message.startswith("unexplained error"):
+                if find_first_line_starting_with(self.log, "ssh:"):
+                    ssh_error = find_first_line_starting_with(self.log, "ssh:")
+                    return ssh_error
+                else:
+                    return rsync_message
+            else:
+                return rsync_message
+        return ""
+
+    @property
     def total_files(self) -> int:
         log_line = find_first_line_starting_with(self.log, "Number of files")
         total_files: int
@@ -152,9 +167,10 @@ class BackupCommand(RsnapshotCommand):
     def state(self) -> ResultState:
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
+        if self.errormessage:
+            return FailedState(self.errormessage)
         if find_first_line_starting_with(self.log, "rsync succeeded"):
             return SuccessState("rsync succeeded")
-
         return UnknownState("Not implemented")
 
     @property

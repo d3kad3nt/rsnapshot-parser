@@ -20,7 +20,7 @@ class ErrorProvider(TextProvider):
             output.append("The Rsnapshot Output is empty")
             output.append("This is probably a sign, that rsnapshot encountered an error")
         if failed:
-            output.append("{} Commands failed:")
+            output.append("{} Commands failed:".format(len(failed)))
             for failed_command in failed:
                 output.append(str(failed_command))
                 if failed_command.errormessage:
