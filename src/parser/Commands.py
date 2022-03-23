@@ -100,34 +100,52 @@ class BackupCommand(RsnapshotCommand):
 
     @property
     def total_files(self) -> int:
-        changed_str: str = (
-            find_first_line_starting_with(self.log, "Number of files").split(":")[1].strip().split("(")[0].strip()
-        )
-        changed = int(changed_str.replace(",", ""))
-        return changed
+        log_line = find_first_line_starting_with(self.log, "Number of files")
+        total_files: int
+        if log_line:
+            total_files_str: str = (
+                log_line.split(":")[1].strip().split("(")[0].strip()
+            )
+            total_files = int(total_files_str.replace(",", ""))
+        else:
+            total_files = 0
+        return total_files
 
     @property
     def changed_files(self) -> int:
-        changed_str: str = (
-            find_first_line_starting_with(self.log, "Number of regular files transferred").split(":")[1].strip()
-        )
-        changed = int(changed_str.replace(",", ""))
+        log_line: str = find_first_line_starting_with(self.log, "Number of regular files transferred")
+        changed: int
+        if log_line:
+            changed_str: str = (log_line.split(":")[1].strip())
+            changed = int(changed_str.replace(",", ""))
+        else:
+            changed = 0
         return changed
 
     @property
     def total_size(self) -> int:
-        changed_str: str = (
-            find_first_line_starting_with(self.log, "Total file size").split(":")[1].strip().split(" ")[0].strip()
-        )
-        changed = int(changed_str.replace(",", ""))
-        return changed
+        log_line = find_first_line_starting_with(self.log, "Total file size")
+        total_size: int
+        if log_line:
+            total_size_str: str = (
+                log_line.split(":")[1].strip().split(" ")[0].strip()
+            )
+            total_size = int(total_size_str.replace(",", ""))
+        else:
+            total_size = 0
+        return total_size
 
     @property
     def changed_size(self) -> int:
-        changed_str: str = (
-            find_first_line_starting_with(self.log, "Total bytes received").split(":")[1].strip()
-        )
-        changed = int(changed_str.replace(",", ""))
+        log_line = find_first_line_starting_with(self.log, "Total bytes received")
+        changed: int
+        if log_line:
+            changed_str: str = (
+                log_line.split(":")[1].strip()
+            )
+            changed = int(changed_str.replace(",", ""))
+        else:
+            changed = 0
         return changed
 
     @property
