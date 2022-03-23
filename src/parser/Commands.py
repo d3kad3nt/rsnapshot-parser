@@ -50,6 +50,8 @@ class RsnapshotCommand:
 
     @property
     def state(self) -> ResultState:
+        if self.errormessage:
+            return FailedState(self.errormessage)
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
         return UnknownState("Not implemented")
@@ -65,6 +67,18 @@ class BackupExecCommand(RsnapshotCommand):
 
     def __str__(self):
         return "Backup Exec: {}".format(self.command)
+
+    @property
+    def errormessage(self) -> str:
+        warning_log = find_first_line_starting_with(self.log, "WARNING")
+        if warning_log:
+            warning_str = warning_log.split(":")[1].strip()
+            if find_first_line_starting_with(self.log, "ssh:"):
+                return find_first_line_starting_with(self.log, "ssh:").strip()
+            else:
+                return warning_str
+        return ""
+
 
 
 class BackupScriptCommand(RsnapshotCommand):
