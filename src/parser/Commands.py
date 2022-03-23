@@ -117,10 +117,11 @@ class BackupCommand(RsnapshotCommand):
         error_line = find_first_line_starting_with(self.log, "rsync error")
         if error_line:
             rsync_message: str = error_line.split(":")[1].strip()
-            if rsync_message.startswith("unexplained error"):
+            if find_first_line_starting_with(self.log, "WARNING:"):
+                return find_first_line_starting_with(self.log, "WARNING:").split(":", maxsplit=1)[1].strip()
+            elif rsync_message.startswith("unexplained error"):
                 if find_first_line_starting_with(self.log, "ssh:"):
-                    ssh_error = find_first_line_starting_with(self.log, "ssh:")
-                    return ssh_error
+                    return find_first_line_starting_with(self.log, "ssh:")
                 else:
                     return rsync_message
             else:
