@@ -1,3 +1,4 @@
 rsnapshot.conf
 rsnapshot.out
 .vscode/*
+__pycache__/
