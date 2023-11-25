@@ -2,13 +2,19 @@ import datetime
 from collections.abc import Sequence
 from typing import Optional
 
-from parser.ResultStates import *
+from output_parser.result_states import (
+    FailedState,
+    NotExecutedState,
+    ResultState,
+    SuccessState,
+    UnknownState,
+)
 from utils.utils import find_first_line_starting_with
 
 
 class RsnapshotCommand:
     def __init__(self):
-        self.log: Sequence[str] = []
+        self._log: Sequence[str] = []
         self._start_time: datetime.datetime = datetime.datetime.min
         self._end_time: datetime.datetime = datetime.datetime.min
         self._errormessage: str = ""
@@ -45,6 +51,7 @@ class RsnapshotCommand:
     def log(self, log: Sequence[str]):
         self._log = log
 
+    # pylint: disable=unused-argument
     def backup_start_line(self, retain_type: Optional[str]) -> str:
         return ""
 
@@ -52,7 +59,7 @@ class RsnapshotCommand:
     def state(self) -> ResultState:
         if self.errormessage:
             return FailedState(self.errormessage)
-        if len(self.log) == 0:
+        if len(self._log) == 0:
             return NotExecutedState("The Command was not executed")
         return UnknownState("Not implemented")
 
@@ -62,7 +69,7 @@ class BackupExecCommand(RsnapshotCommand):
         self.command: str = command
         super().__init__()
 
-    def backup_start_line(self, _: Optional[str]) -> str:
+    def backup_start_line(self, retain_type: Optional[str]) -> str:
         return self.command
 
     def __str__(self):
@@ -80,16 +87,16 @@ class BackupExecCommand(RsnapshotCommand):
         return ""
 
 
-
 class BackupScriptCommand(RsnapshotCommand):
     def __init__(self, source: str, destination: str):
         self.source: str = source
         self.destination: str = destination
         super().__init__()
 
-    def backup_start_line(self, _: Optional[str]) -> str:
+    def backup_start_line(self, retain_type: Optional[str]) -> str:
         return self.source
 
+    @property
     def state(self) -> ResultState:
         if len(self.log) == 0:
             return NotExecutedState("The Command was not executed")
@@ -109,8 +116,10 @@ class BackupCommand(RsnapshotCommand):
 
     def backup_start_line(self, retain_type: Optional[str]) -> str:
         if not retain_type:
-            Exception("No retain type given")
-        return "{} /mnt/Backup/{}.0/{}".format(self.source, retain_type, self.destination)
+            raise Exception("No retain type given")
+        return "{} /mnt/Backup/{}.0/{}".format(
+            self.source, retain_type, self.destination
+        )
 
     @property
     def errormessage(self) -> str:
@@ -118,7 +127,11 @@ class BackupCommand(RsnapshotCommand):
         if error_line:
             rsync_message: str = error_line.split(":")[1].strip()
             if find_first_line_starting_with(self.log, "WARNING:"):
-                return find_first_line_starting_with(self.log, "WARNING:").split(":", maxsplit=1)[1].strip()
+                return (
+                    find_first_line_starting_with(self.log, "WARNING:")
+                    .split(":", maxsplit=1)[1]
+                    .strip()
+                )
             elif rsync_message.startswith("unexplained error"):
                 if find_first_line_starting_with(self.log, "ssh:"):
                     return find_first_line_starting_with(self.log, "ssh:")
@@ -133,9 +146,7 @@ class BackupCommand(RsnapshotCommand):
         log_line = find_first_line_starting_with(self.log, "Number of files")
         total_files: int
         if log_line:
-            total_files_str: str = (
-                log_line.split(":")[1].strip().split("(")[0].strip()
-            )
+            total_files_str: str = log_line.split(":")[1].strip().split("(")[0].strip()
             total_files = int(total_files_str.replace(",", ""))
         else:
             total_files = 0
@@ -143,10 +154,12 @@ class BackupCommand(RsnapshotCommand):
 
     @property
     def changed_files(self) -> int:
-        log_line: str = find_first_line_starting_with(self.log, "Number of regular files transferred")
+        log_line: str = find_first_line_starting_with(
+            self.log, "Number of regular files transferred"
+        )
         changed: int
         if log_line:
-            changed_str: str = (log_line.split(":")[1].strip())
+            changed_str: str = log_line.split(":")[1].strip()
             changed = int(changed_str.replace(",", ""))
         else:
             changed = 0
@@ -157,9 +170,7 @@ class BackupCommand(RsnapshotCommand):
         log_line = find_first_line_starting_with(self.log, "Total file size")
         total_size: int
         if log_line:
-            total_size_str: str = (
-                log_line.split(":")[1].strip().split(" ")[0].strip()
-            )
+            total_size_str: str = log_line.split(":")[1].strip().split(" ")[0].strip()
             total_size = int(total_size_str.replace(",", ""))
         else:
             total_size = 0
@@ -170,9 +181,7 @@ class BackupCommand(RsnapshotCommand):
         log_line = find_first_line_starting_with(self.log, "Total bytes received")
         changed: int
         if log_line:
-            changed_str: str = (
-                log_line.split(":")[1].strip()
-            )
+            changed_str: str = log_line.split(":")[1].strip()
             changed = int(changed_str.replace(",", ""))
         else:
             changed = 0
@@ -192,7 +201,7 @@ class BackupCommand(RsnapshotCommand):
     def changed_file_list(self) -> Sequence[str]:
         start_changed_files = "receiving incremental file list"
         filelist = False
-        files = []
+        files: list[str] = []
         for line in self.log:
             if start_changed_files in line:
                 filelist = True

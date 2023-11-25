@@ -1,7 +1,7 @@
 import abc
 from collections.abc import Sequence
 
-from parser.ParsedOutput import ParsedOutput
+from output_parser.parsed_output import ParsedOutput
 
 
 class TextProvider(abc.ABC):
@@ -16,10 +16,9 @@ class TextProvider(abc.ABC):
 
 
 class EmptyTextProvider(TextProvider):
-
     @classmethod
     def name(cls) -> str:
         return "EmptyText"
 
-    def text(self, _: ParsedOutput) -> Sequence[str]:
+    def text(self, parsed_output: ParsedOutput) -> Sequence[str]:
         return []

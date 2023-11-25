@@ -3,14 +3,13 @@ import ssl
 import email.message
 from collections.abc import Sequence
 
-from modules import outputModule
-from parser.ParsedOutput import ParsedOutput
+from modules import output_module
+from output_parser.parsed_output import ParsedOutput
 from provider.providers import get_text_from_providers
 from utils.config import Config
 
 
-class EMailModule(outputModule.OutputModule):
-
+class EMailModule(output_module.OutputModule):
     @classmethod
     def name(cls) -> str:
         return "EMail"
@@ -29,16 +28,20 @@ class EMailModule(outputModule.OutputModule):
         sender_name = self._config.get_str("sender_name")
         message: email.message.Message = email.message.Message()
         if sender_name:
-            message['From'] = "{} <{}>".format(sender_name, sender_address)
+            message["From"] = "{} <{}>".format(sender_name, sender_address)
         else:
-            message['From'] = sender_address
-        message['To'] = receiver_address
-        message['Subject'] = subject
+            message["From"] = sender_address
+        message["To"] = receiver_address
+        message["Subject"] = subject
         message.set_payload("".join(output))
 
         with self.get_connection() as server:
             server.login(user=sender_address, password=password)
-            server.sendmail(from_addr=sender_address, to_addrs=receiver_address, msg=message.as_string())
+            server.sendmail(
+                from_addr=sender_address,
+                to_addrs=receiver_address,
+                msg=message.as_string(),
+            )
 
     def get_connection(self):
         encryption = self._config.get_str("encryption", "SSL")
@@ -55,7 +58,11 @@ class EMailModule(outputModule.OutputModule):
             server.starttls(context=context)
             return server
         else:
-            raise Exception("Unknown encryption :{}. Only SSL, TLS and STARTTLS are supported".format(encryption))
+            raise Exception(
+                "Unknown encryption :{}. Only SSL, TLS and STARTTLS are supported".format(
+                    encryption
+                )
+            )
 
     @staticmethod
     def get_subject(parsed_output: ParsedOutput) -> str:

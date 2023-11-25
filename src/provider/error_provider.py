@@ -1,7 +1,7 @@
 from typing import Sequence
 
-from parser.ParsedOutput import ParsedOutput
-from parser.ResultStates import FailedState, NotExecutedState
+from output_parser.parsed_output import ParsedOutput
+from output_parser.result_states import FailedState, NotExecutedState
 from provider.text_provider import TextProvider
 
 
@@ -18,7 +18,9 @@ class ErrorProvider(TextProvider):
         output = ["ERRORS:"]
         if parsed_output.empty_log:
             output.append("The Rsnapshot Output is empty")
-            output.append("This is probably a sign, that rsnapshot encountered an error")
+            output.append(
+                "This is probably a sign, that rsnapshot encountered an error"
+            )
         if failed:
             output.append("{} Commands failed:".format(len(failed)))
             for failed_command in failed:

@@ -1,14 +1,12 @@
 from collections.abc import Sequence
 
-from parser.ParsedOutput import ParsedOutput
-from provider.providers import get_provider, get_text_from_providers
+from output_parser.parsed_output import ParsedOutput
+from provider.providers import get_text_from_providers
 from utils.config import Config
-from utils.utils import print_list
-from . import outputModule
+from . import output_module
 
 
-class FileModule(outputModule.OutputModule):
-
+class FileModule(output_module.OutputModule):
     @classmethod
     def name(cls) -> str:
         return "File"
@@ -21,11 +19,6 @@ class FileModule(outputModule.OutputModule):
         output: Sequence[str] = get_text_from_providers(providers, parsed_output)
         filepath = self._config.get_str("filepath")
         if filepath:
-            #TODO error handling with filename
-            with open(filepath, "w") as output_file:
+            # TODO error handling with filename
+            with open(filepath, "w", encoding="UTF-8") as output_file:
                 output_file.writelines(output)
-
-
-
-
-

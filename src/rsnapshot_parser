@@ -4,28 +4,35 @@ import argparse
 from collections.abc import Sequence
 
 from modules.modules import get_output_module, get_all_module_names
-from modules.outputModule import OutputModule
-from parser.ParsedOutput import ParsedOutput
-from parser.RsnapshotConfig import RsnapshotConfig
-from utils.utils import comma_seperated
+from modules.output_module import OutputModule
+from output_parser.parsed_output import ParsedOutput
+from output_parser.rsnapshot_config import RsnapshotConfig
+from utils.utils import comma_separated
 
 UTF_8 = "UTF-8"
 
 
 def get_args() -> argparse.Namespace:
+    # pylint: disable=line-too-long
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="This program is used to format the output of rsnapshot and output it to different modules. "
-                    "It takes the output of rsnapshot from stdin."
+        "It takes the output of rsnapshot from stdin."
     )
-    parser.add_argument("-m", "--modules", nargs="+", required=True,
-                        help="A space seperated List of modules. This are the allowed modules: {}".format(
-                            comma_seperated(get_all_module_names())))
+    parser.add_argument(
+        "-m",
+        "--modules",
+        nargs="+",
+        required=True,
+        help="A space separated List of modules. This are the allowed modules: {}".format(
+            comma_separated(get_all_module_names())
+        ),
+    )
     return parser.parse_args()
 
 
 def output_log(output_module_names: Sequence[str], parsed_output: ParsedOutput) -> None:
-    for moduleName in output_module_names:
-        module: OutputModule = get_output_module(moduleName)
+    for module_name in output_module_names:
+        module: OutputModule = get_output_module(module_name)
         module.output(parsed_output)
 
 

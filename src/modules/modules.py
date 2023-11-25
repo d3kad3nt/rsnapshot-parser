@@ -3,7 +3,7 @@ from typing import Type
 
 from modules.email import EMailModule
 from modules.gotify import GotifyModule
-from modules.outputModule import EmptyModule, OutputModule
+from modules.output_module import EmptyModule, OutputModule
 from modules.file import FileModule
 from modules.stdout import StdoutModule
 
@@ -11,7 +11,7 @@ all_modules: Iterable[Type[OutputModule]] = {
     FileModule,
     GotifyModule,
     EMailModule,
-    StdoutModule
+    StdoutModule,
 }
 
 
@@ -20,9 +20,8 @@ def get_output_module(module_name: str) -> OutputModule:
     for module in all_modules:
         if module.name().lower() == module_name:
             return module()
-    else:
-        print("Module {} not found".format(module_name))
-        return EmptyModule()
+    print("Module {} not found".format(module_name))
+    return EmptyModule()
 
 
 def get_all_module_names() -> Sequence[str]:

@@ -4,9 +4,18 @@ import sys
 from collections.abc import Sequence
 from typing import TextIO, Union
 
-from parser.Commands import BackupCommand, BackupScriptCommand, BackupExecCommand, RsnapshotCommand
+from output_parser.commands import (
+    BackupCommand,
+    BackupScriptCommand,
+    BackupExecCommand,
+    RsnapshotCommand,
+)
 from utils.config import Config
-from utils.utils import find_lines_starting_with, find_first_line_starting_with, split_by_tab
+from utils.utils import (
+    find_lines_starting_with,
+    find_first_line_starting_with,
+    split_by_tab,
+)
 
 
 class RsnapshotConfig:
@@ -59,16 +68,18 @@ class RsnapshotConfig:
         return int(self._get_first_value_in_config("verbose"))
 
     def _parse_config(self) -> None:
-        configfile: str = self._config.get_str(key="rsnapshot_config", default_value="/etc/rsnapshot.conf")
-        if not os.path.isfile(configfile):
-            raise Exception("The configfile {} doesn't exist.".format(configfile))
+        config_file: str = self._config.get_str(
+            key="rsnapshot_config", default_value="/etc/rsnapshot.conf"
+        )
+        if not os.path.isfile(config_file):
+            raise Exception("The config file {} doesn't exist.".format(config_file))
 
-        with open(configfile, "r", encoding=self.encoding) as config:
+        with open(config_file, "r", encoding=self.encoding) as config:
             self._lines: Sequence[str] = self._load_config(config)
 
-    def _load_config(self, configfile: Union[TextIO, Sequence[str]]) -> Sequence[str]:
+    def _load_config(self, config_file: Union[TextIO, Sequence[str]]) -> Sequence[str]:
         result: list[str] = []
-        for line in configfile:
+        for line in config_file:
             if line.startswith("#"):
                 continue
             elif "include_conf" in line:

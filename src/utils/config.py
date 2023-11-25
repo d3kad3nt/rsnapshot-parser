@@ -1,9 +1,8 @@
 import configparser
-from typing import Optional, Type, Sequence
+from typing import Optional, Sequence
 
 
 class Config:
-
     def __init__(self, section: str, path: str = "/etc/rsnapshot_parser.conf"):
         self._parser: configparser.ConfigParser = configparser.ConfigParser()
         self._parser.read(path)
@@ -25,9 +24,16 @@ class Config:
             return self._parser.getint(section=self._section, option=key)
         return default_value
 
-    def get_str_list(self, key: str, default_value=None) -> Sequence[str]:
+    def get_str_list(
+        self, key: str, default_value: Optional[Sequence[str]] = None
+    ) -> Sequence[str]:
         if self._parser.has_option(section=self._section, option=key):
-            return list(map(str.strip, self._parser.get(section=self._section, option=key).split(",")))
+            return list(
+                map(
+                    str.strip,
+                    self._parser.get(section=self._section, option=key).split(","),
+                )
+            )
         if default_value is None:
             default_value = []
         return default_value

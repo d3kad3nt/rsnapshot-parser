@@ -1,14 +1,13 @@
 from collections.abc import Sequence
 
-from parser.ParsedOutput import ParsedOutput
-from provider.providers import get_provider, get_text_from_providers
+from output_parser.parsed_output import ParsedOutput
+from provider.providers import get_text_from_providers
 from utils.config import Config
 from utils.utils import print_list
-from . import outputModule
+from . import output_module
 
 
-class StdoutModule(outputModule.OutputModule):
-
+class StdoutModule(output_module.OutputModule):
     @classmethod
     def name(cls) -> str:
         return "StdOut"
