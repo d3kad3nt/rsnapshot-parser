@@ -27,7 +27,7 @@ class StatisticsProvider(TextProvider):
             range_limit = min(5, len(backup_points))
             for i in range(range_limit):
                 output.append(
-                    "{}.: {} ({})".format(
+                    "\t{}.: {} ({})".format(
                         i + 1, backup_points[i], backup_points[i].duration
                     )
                 )
@@ -38,7 +38,7 @@ class StatisticsProvider(TextProvider):
             backup_actions.sort(key=lambda x: x.changed_files, reverse=True)
             for i in range(range_limit):
                 output.append(
-                    "{}.: {} ({} files)".format(
+                    "\t{}.: {} ({} files)".format(
                         i + 1, backup_actions[i], backup_actions[i].changed_files
                     )
                 )
@@ -46,7 +46,7 @@ class StatisticsProvider(TextProvider):
             backup_actions.sort(key=lambda x: x.changed_size, reverse=True)
             for i in range(range_limit):
                 output.append(
-                    "{}.: {} ({})".format(
+                    "\t{}.: {} ({})".format(
                         i + 1,
                         backup_actions[i],
                         format_bytes(backup_actions[i].changed_size),
