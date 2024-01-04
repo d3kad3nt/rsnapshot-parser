@@ -88,6 +88,15 @@ These are the settings that exist:
 **url**: The URL of the used gotify instance.  
 **api_token**: The api_token from gotify that was created for the application.  
 
+### Ntfy
+This module outputs a short message to a ntfy server if the backup was successful or not.
+
+#### Config
+The settings for the ntfy Module are in the "ntfy" Section of the config file.
+These are the settings that exist:  
+**url**: The URL of the used ntfy instance.  
+**topic**: The topic that should receive the notifications.  
+
 ### Text Provider
 Text Provider are used to deliver text to the modules and can be used in multiple modules.
 If a module supports them they can be configured with the "providers" setting. 

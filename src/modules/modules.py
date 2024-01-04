@@ -3,6 +3,7 @@ from typing import Type
 
 from modules.email import EMailModule
 from modules.gotify import GotifyModule
+from modules.ntfy import NtfyModule
 from modules.output_module import EmptyModule, OutputModule
 from modules.file import FileModule
 from modules.stdout import StdoutModule
@@ -10,6 +11,7 @@ from modules.stdout import StdoutModule
 all_modules: Iterable[Type[OutputModule]] = {
     FileModule,
     GotifyModule,
+    NtfyModule,
     EMailModule,
     StdoutModule,
 }
