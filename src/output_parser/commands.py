@@ -118,7 +118,7 @@ class BackupCommand(RsnapshotCommand):
         if not retain_type:
             raise Exception("No retain type given")
         return "{} /mnt/Backup/{}.0/{}".format(
-            self.source, retain_type, self.destination
+            self.source, retain_type, self.destination.lstrip(".")
         )
 
     @property

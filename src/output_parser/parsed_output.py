@@ -1,5 +1,4 @@
 import sys
-from sys import stdin
 from collections.abc import Sequence
 from typing import Type, Optional
 from datetime import datetime, timedelta
@@ -30,9 +29,14 @@ class ParsedOutput:
         current_backup_point: int = -1
         current_backup_point_log: list[str] = []
         for line in self._log:
-            if (current_backup_point + 1) < len(backup_points) and backup_points[
-                current_backup_point + 1
-            ].backup_start_line(self.retain_type) in line:
+            next_backup_point = current_backup_point + 1
+            if (next_backup_point) >= len(backup_points):
+                current_backup_point_log.append(line)
+                continue
+            if (
+                backup_points[next_backup_point].backup_start_line(self.retain_type)
+                in line
+            ):
                 if current_backup_point >= 0:
                     backup_points[current_backup_point].log = current_backup_point_log
                 current_backup_point += 1
@@ -146,7 +150,7 @@ class ParsedOutput:
     def _read_input() -> Sequence[str]:
         multiline_segment: str = ""
         processed_lines: list[str] = []
-        for line in stdin:
+        for line in sys.stdin:
             # Rsnapshot cuts long lines into multiple lines separated by "\"
             if multiline_segment:
                 line = multiline_segment + line[4:]
